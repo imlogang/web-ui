@@ -32,8 +32,14 @@
         <div class="container">
             <h2>About Me</h2>
             <p>Hello! I'm Logan Godsey, a Senior Support Engineer.</p>
-            <p>This is a custom built website hosted locally at my house. It holds my resume plus a bit about me.</p>
-            <p>I love technology and all of the fun and cool things you can do with it.</p>
+            <p>From a young age I've always been interested in technology, whether it was about space, consumer, or enterprise level technology.</p>
+            <p>I've always wanted a fairly static website that I can host myself to show off some of the skills I've learned and this would be that place!</p>
+            <p></p>
+            <p>This website is hosted in a personal Kubernetes cluster located within my own network.</p>
+            <p>It is deployed using a <a href="https://github.com/imlogang/web-ui-helm" target="_blank">custom Helm chart</a> which is then built and deployed via CircleCI.</p>
+            <p>You can see the source code in my repository <a href="https://github.com/imlogang/web-ui" target="_blank">here.</a></p>
+            <p>Nginx Proxy Manager sits in front of my Kong deployment to provide SSL certs while Kong provides the routing to the <code>web-ui</code> pod.</p>
+            <p></p>
             <p>Feel free to explore the links below!</p>
         </div>
     </section>
