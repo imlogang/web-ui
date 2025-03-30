@@ -4,6 +4,9 @@ circleci:
   jobNumber: ""
   project_id: "73a64d39-7b67-4669-b5b5-488c5ff24998"
 
+image:
+  repository: imlogang/web-ui
+
 imagePullSecrets:
   - name: regcred
 
