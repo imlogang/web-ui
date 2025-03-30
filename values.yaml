@@ -1,0 +1,16 @@
+circleci:
+  pipelineId: ""
+  workflowId: ""
+  jobNumber: ""
+  project_id: "73a64d39-7b67-4669-b5b5-488c5ff24998"
+
+imagePullSecrets:
+  - name: regcred
+
+resources:
+  limits:
+    cpu: 256m
+    memory: 256Mi
+  requests:
+    cpu: 256m
+    memory: 256Mi
