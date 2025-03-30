@@ -57,3 +57,10 @@ workflows:
       - deploy-web-ui:
           requires:
             - build-image
+      - release-web-ui:
+          requires:
+            - deploy-web-ui
+          filters:
+            branches:
+              only:
+                - main
