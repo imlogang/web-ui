@@ -1,0 +1,59 @@
+version: 2.1
+
+jobs:
+  build-image:
+    machine: 
+      image: ubuntu-2204:current
+      docker_layer_caching: true
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Docker Build
+          command: |
+            export CIRCLE_SHA1=$(echo ${CIRCLE_SHA1} | cut -c 1-5)
+            docker build --build-arg DOCKER_TAG=$CIRCLE_SHA1 -t imlogang/web-ui:$CIRCLE_SHA1 .
+      - run: 
+          name: Docker Login
+          command: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - run:
+          name: Docker Push
+          command: |
+            export CIRCLE_SHA1=$(echo ${CIRCLE_SHA1} | cut -c 1-5)
+            docker push imlogang/web-ui:$CIRCLE_SHA1
+
+  deploy-web-ui:
+    resource_class: logan/container-runner
+    docker:
+      - image: cimg/deploy:2025.01.1
+    steps:
+      - checkout
+      - run:
+          name: Helm Repo Add
+          command: |
+            helm repo add web-ui-helm https://imlogang.github.io/web-ui-helm/
+            helm repo update
+      - run: 
+          name: Helm Upgrade
+          command: |
+            export CIRCLE_SHA2=$(echo "${CIRCLE_SHA1}" | cut -c 1-5)
+            helm upgrade --install --debug web-ui web-ui-helm/web-ui --set image.tag=${CIRCLE_SHA2} --set circleci.pipelineId=<< pipeline.id >> --set circleci.workflowId=${CIRCLE_WORKFLOW_ID} --set circleci.jobNumber=${CIRCLE_BUILD_NUM} -n web-ui -f values.yaml
+      - run: 
+          name: Watch release
+          command: |
+            export CIRCLE_SHA2=$(echo "${CIRCLE_SHA1}" | cut -c 1-5)
+            circleci run release plan --environment-name="Microk8s Cluster" --component-name="web-ui" --target-version="${CIRCLE_SHA2}" --namespace="web-ui" web-ui
+
+  release-web-ui:
+    type: release
+    plan_name: web-ui
+
+workflows:
+  deploy-web-ui:
+    jobs:
+      - build-image:
+          context:
+            - docker_stuff
+      - deploy-web-ui:
+          requires:
+            - build-image
