@@ -25,7 +25,7 @@ jobs:
   deploy-web-ui:
     resource_class: logan/container-runner
     docker:
-      - image: dockerregistry.logangodsey.com/toolbox:0.1.1
+      - image: dockerregistry.logangodsey.com/toolbox:118-debb3"
     steps:
       - checkout
       - run:
