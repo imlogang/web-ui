@@ -1,17 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "dependencyDashboard": true,
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "automerge": true
-    }
-  ],
+
   "hostRules": [
     {
       "hostType": "docker",
-      "hostName": "dockerregistry.logangodsey.com"
+      "matchHost": "dockerregistry.logangodsey.com"
+    }
+  ],
+
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["dockerregistry.logangodsey.com/toolbox"],
+      "versioning": "loose",
+      "automerge": true
     }
   ]
 }
