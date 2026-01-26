@@ -57,6 +57,7 @@ workflows:
       - deploy-web-ui:
           requires:
             - build-image
+          serial-group: << pipeline.project.slug >>/deploy-group
       - release-web-ui:
           requires:
             - deploy-web-ui
