@@ -58,6 +58,10 @@ workflows:
           requires:
             - build-image
           serial-group: << pipeline.project.slug >>/deploy-group
+          filters:
+            branches:
+              only:
+                - main
       - release-web-ui:
           requires:
             - deploy-web-ui
