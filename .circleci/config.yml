@@ -15,10 +15,8 @@ commands:
 
 jobs:
   build-image:
-    machine: 
-      image: ubuntu-2204:current
-      docker_layer_caching: true
-    resource_class: large
+    machine: true
+    resource_class: logan/machine_medium 
     steps:
       - checkout
       - get-tag
@@ -41,15 +39,10 @@ jobs:
     steps:
       - checkout
       - get-tag
-      - run:
-          name: Helm Repo Add
-          command: |
-            helm repo add web-ui-helm https://imlogang.github.io/web-ui-helm/
-            helm repo update
       - run: 
           name: Helm Upgrade
           command: |
-            helm upgrade --install --debug web-ui web-ui-helm/web-ui --set image.tag=${TAG} --set circleci.pipelineId=<< pipeline.id >> --set circleci.workflowId=${CIRCLE_WORKFLOW_ID} --set circleci.jobNumber=${CIRCLE_BUILD_NUM} -n web-ui -f values.yaml
+            helm upgrade --install --debug web-ui ./deploy --set image.tag=${TAG} --set circleci.pipelineId=<< pipeline.id >> --set circleci.workflowId=${CIRCLE_WORKFLOW_ID} --set-string circleci.jobNumber=${CIRCLE_BUILD_NUM} -n web-ui -f values.yaml
       - run: 
           name: Watch release
           command: |
@@ -60,7 +53,7 @@ jobs:
     plan_name: web-ui
 
 workflows:
-  deploy-web-ui:
+  build-and-deploy-web-ui:
     jobs:
       - build-image:
           context:
