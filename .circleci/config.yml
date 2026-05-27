@@ -1,20 +1,7 @@
 version: 2.1
 
 orbs:
-  beemoviebot-orb: logan/beemoviebot-orb@0
-
-commands:
-  get-tag:
-    steps:
-      - run:
-          name: Create Tag Environment Variable
-          command: |
-              SHORT_SHA=${CIRCLE_SHA1:0:7}
-              TAG="1.0.<< pipeline.number >>-${SHORT_SHA}"
-
-              echo "export TAG='$TAG'" >> "$BASH_ENV"
-              source $BASH_ENV
-              echo $TAG
+  reusable-commands: logan/reusable-commands@0.0.1
 
 jobs:
   build-image:
@@ -23,13 +10,16 @@ jobs:
     resource_class: large.gen2
     steps:
       - checkout
-      - get-tag
+      - reusable-commands/get_tag:
+          orb_pipeline_number: << pipeline.number >>
       - run:
           name: Docker Build
           command: |
             docker build -t imlogang/web-ui:$TAG .
-      - beemoviebot-orb/install_trivy
-      - beemoviebot-orb/run_trivy
+      - reusable-commands/install_trivy
+      - reusable-commands/run_trivy:
+          scan_image: true
+          image_name: "imlogang/web-ui"
       - run: 
           name: Docker Login
           command: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
@@ -44,7 +34,8 @@ jobs:
       - image: dockerregistry.logangodsey.com/toolbox:latest
     steps:
       - checkout
-      - get-tag
+      - reusable-commands/get_tag:
+          orb_pipeline_number: << pipeline.number >>
       - run: 
           name: Helm Upgrade
           command: |
