@@ -7,7 +7,7 @@ commands:
           name: Create Tag Environment Variable
           command: |
               SHORT_SHA=${CIRCLE_SHA1:0:7}
-              TAG="1.0-<< pipeline.number >>-${SHORT_SHA}"
+              TAG="1.0.<< pipeline.number >>-${SHORT_SHA}"
 
               echo "export TAG='$TAG'" >> "$BASH_ENV"
               source $BASH_ENV
@@ -15,8 +15,9 @@ commands:
 
 jobs:
   build-image:
-    machine: true
-    resource_class: logan/machine_medium 
+    machine:
+      image: ubuntu-2404:current
+    resource_class: large.gen2
     steps:
       - checkout
       - get-tag
@@ -33,9 +34,9 @@ jobs:
             docker push imlogang/web-ui:$TAG
 
   deploy-web-ui:
-    resource_class: logan/container-runner
+    resource_class: logan/small
     docker:
-      - image: dockerregistry.logangodsey.com/toolbox:124-bbb90
+      - image: dockerregistry.logangodsey.com/toolbox:latest
     steps:
       - checkout
       - get-tag
@@ -52,15 +53,27 @@ jobs:
     type: release
     plan_name: web-ui
 
+  helm-lint:
+    docker: 
+      - image: dockerregistry.logangodsey.com/toolbox:latest\
+    resource_class: logan/small
+    steps:
+      - checkout
+      - run:
+          name: helm lint
+          command: helm lint ./deploy 
+
 workflows:
   build-and-deploy-web-ui:
     jobs:
       - build-image:
           context:
             - docker_stuff
+      - helm-lint
       - deploy-web-ui:
           requires:
             - build-image
+            - helm-lint
           serial-group: << pipeline.project.slug >>/deploy-group
           filters:
             branches:
