@@ -55,7 +55,7 @@ jobs:
 
   helm-lint:
     docker: 
-      - image: dockerregistry.logangodsey.com/toolbox:latest\
+      - image: dockerregistry.logangodsey.com/toolbox:latest
     resource_class: logan/small
     steps:
       - checkout
