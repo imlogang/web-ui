@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  beemoviebot-orb: logan/beemoviebot-orb@0
+
 commands:
   get-tag:
     steps:
@@ -25,6 +28,8 @@ jobs:
           name: Docker Build
           command: |
             docker build -t imlogang/web-ui:$TAG .
+      - beemoviebot-orb/install_trivy
+      - beemoviebot-orb/run_trivy
       - run: 
           name: Docker Login
           command: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
