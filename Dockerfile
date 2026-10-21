@@ -1,4 +1,4 @@
-FROM nginx:1.31.7-alpine
+FROM nginx:1.31.8-alpine
 RUN apk update && apk upgrade
 COPY src /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
