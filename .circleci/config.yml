@@ -16,10 +16,36 @@ jobs:
           name: Docker Build
           command: |
             docker build -t imlogang/web-ui:$TAG .
+      - run:
+          name: Smoke Test
+          command: test/smoke.sh imlogang/web-ui:$TAG
       - reusable-commands/install_trivy
       - reusable-commands/run_trivy:
           scan_image: true
           image_name: "imlogang/web-ui"
+      - run:
+          name: Save Image
+          command: |
+            mkdir -p workspace
+            docker save -o workspace/web-ui.tar imlogang/web-ui:$TAG
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - web-ui.tar
+
+  push-image:
+    machine:
+      image: ubuntu-2404:current
+    resource_class: large.gen2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: workspace
+      - reusable-commands/get_tag:
+          orb_pipeline_number: << pipeline.number >>
+      - run:
+          name: Docker Load
+          command: docker load -i workspace/web-ui.tar
       - run: 
           name: Docker Login
           command: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
@@ -62,13 +88,20 @@ jobs:
 workflows:
   build-and-deploy-web-ui:
     jobs:
-      - build-image:
+      - build-image
+      - helm-lint
+      - push-image:
           context:
             - docker_stuff
-      - helm-lint
-      - deploy-web-ui:
           requires:
             - build-image
+          filters:
+            branches:
+              only:
+                - main
+      - deploy-web-ui:
+          requires:
+            - push-image
             - helm-lint
           serial-group: << pipeline.project.slug >>/deploy-group
           filters:
