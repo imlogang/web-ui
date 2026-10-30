@@ -36,7 +36,7 @@ jobs:
   push-image:
     machine:
       image: ubuntu-2404:current
-    resource_class: large.gen2
+    resource_class: medium.gen2
     steps:
       - checkout
       - attach_workspace:
